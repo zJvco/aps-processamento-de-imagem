@@ -1,3 +1,4 @@
+import math
 from PIL import Image
 
 from cinza import cinza
@@ -13,14 +14,16 @@ HORIZONTAL_KERNEL = [
     [-1, 0, 1]
 ]
 
+# Transform image in grayscale
 img = cinza(Image.open("./img/baloes.jpg"))
 img_width = img.width
 img_height = img.height
 
-output_img = Image.new("RGB", (img_width, img_height))
+# Output image
+output_img = Image.new("L", (img_width, img_height))
 
 
-def get_modified_pixel(x, y, dir_kernel):
+def get_modified_pixel(x, y, dir_kernel, offset=0):
     acc = 0
 
     # Getting window pixels
@@ -35,11 +38,9 @@ def get_modified_pixel(x, y, dir_kernel):
             if cur_kernel_value == 0:
                 continue
 
-            r, g, b = img.getpixel((k, m))
+            pixel = img.getpixel((k, m))[0]
 
-            result = r * cur_kernel_value
-            # g += g * cur_kernel_value
-            # b += b * cur_kernel_value
+            result = pixel * cur_kernel_value
 
             acc += result
 
@@ -48,11 +49,16 @@ def get_modified_pixel(x, y, dir_kernel):
 
 for x in range(img_width):
     for y in range(img_height):
-        pixel = get_modified_pixel(x, y, VERTICAL_KERNEL)
+        # Horizontal edges
+        gx = get_modified_pixel(x, y, HORIZONTAL_KERNEL)
+        # Vertical edges
+        gy = get_modified_pixel(x, y, VERTICAL_KERNEL)
 
-        output_img.putpixel((x, y), pixel)
+        g = int(math.sqrt(gx ** 2 + gy ** 2))
 
-output_img.save("./img/output.jpg")
+        output_img.putpixel((x, y), g)
+
+output_img.save("./img/resultado.jpg")
 
 # x - 1, y - 1 || x - 1, y || x - 1, y + 1
 # x, y - 1 || x, y || x, y + 1
