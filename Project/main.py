@@ -1,8 +1,6 @@
 import math
 from PIL import Image
 
-from cinza import cinza
-
 VERTICAL_KERNEL = [
     [1, 2, 1],
     [0, 0, 0],
@@ -14,13 +12,21 @@ HORIZONTAL_KERNEL = [
     [-1, 0, 1]
 ]
 
-# Transform image in grayscale
-img = cinza(Image.open("./img/baloes.jpg"))
-img_width = img.width
-img_height = img.height
 
-# Output image
-output_img = Image.new("L", (img_width, img_height))
+def cinza(imagem):
+    w, h = imagem.size # pegando o tamanho da imagem
+    img = Image.new('RGB', (w, h)) # gerando uma nova imagem copia para manter a original
+
+    # perccorendo pelos pixels da imagem
+    for x in range(w):
+        for y in range(h):
+            pixel = imagem.getpixel((x,y))
+            # pegando a media entre as cores para a escala de cinza
+            luminancia = (pixel[0] + pixel[1] + pixel[2]) // 3 # pega o resultado da divisão inteira, pois o RGB não aceita decimais
+            # para uma cor cinza todos as cores do pixel devem ser iguais
+            img.putpixel((x,y), (luminancia, luminancia, luminancia)) # alterando as cores do pixels para transforma em cinza
+            
+    return img
 
 
 def get_modified_pixel(x, y, dir_kernel, offset=0):
@@ -47,6 +53,14 @@ def get_modified_pixel(x, y, dir_kernel, offset=0):
     return acc
 
 
+# Transform image in grayscale
+img = cinza(Image.open("./img/formas geometricas.jpg"))
+img_width = img.width
+img_height = img.height
+
+# Output image
+output_img = Image.new("L", (img_width, img_height))
+
 for x in range(img_width):
     for y in range(img_height):
         # Horizontal edges
@@ -58,8 +72,4 @@ for x in range(img_width):
 
         output_img.putpixel((x, y), g)
 
-output_img.save("./img/resultado.jpg")
-
-# x - 1, y - 1 || x - 1, y || x - 1, y + 1
-# x, y - 1 || x, y || x, y + 1
-# x + 1, y - 1 || x + 1, y || x + 1, y + 1
+output_img.save("./img/formas geometricas output.jpg")
